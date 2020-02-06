@@ -2,6 +2,8 @@
 #
 """Clean up the lovecraft files that were downloaded in lovecraft.py"""
 
+# TODO: Clean up this file...
+
 import os
 import re
 import logging
@@ -14,7 +16,7 @@ logging.basicConfig(format=LOG_CONFIG, level=3)
 TEST_DIR = r".\test_clean"
 TEST_DIR_PATH = os.path.realpath(r".\test_clean")
 
-
+### DO YOU NEED THIS...??
 def cmd_line_args():
     "Parse the command line arguments."
     parser = ArgumentParser()
@@ -52,6 +54,8 @@ def remove_unwanted(text):
     "Function to remove unwanted tokens from text."
 
     author = "HP-Lovecraft"
+
+    # TODO: Handle cases where the following doesn't work...
 
     # text = text.split('by') if 'by' in text else text.split('By')
     if 'by' in text:

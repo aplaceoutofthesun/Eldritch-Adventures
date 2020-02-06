@@ -24,7 +24,6 @@ logging.basicConfig(format=LOG_CONF,
 def main():
     "Download the lovecraft files..."
 
-
     logging.info('Requesting links...')
     req = requests.get(ADDR)
 
@@ -47,17 +46,18 @@ def main():
         "fiction" : [x for x in links if x.startswith('fiction')],
         "poetry" : [x for x in links if x.startswith('poetry')],
         "essays" : [x for x in links if x.startswith('essays')],
-        #"letters" : [x for x in links if x.startswith('letters')]
+        "letters" : [x for x in links if x.startswith('letters')]
         }
     logging.info('Finished link parsing...')
 
     # print(fiction)
 
 # Set up the logger.
-    prefixes = ["fiction", "poetry", "essays"]#, "letters"]
+    prefixes = ["fiction", "poetry", "essays", "letters"]
     # prefixes = ["letters"]
 
     logging.info('Downloading files...')
+
     for pre in prefixes:
 
         # Define a path to save the files.
