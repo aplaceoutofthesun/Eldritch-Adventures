@@ -2,8 +2,6 @@
 #
 """Clean up the lovecraft files that were downloaded in lovecraft.py"""
 
-# TODO: Clean up this file...
-
 import os
 import re
 import logging
@@ -12,11 +10,12 @@ from argparse import ArgumentParser
 
 LOG_CONFIG = '%(asctime)s - %(levelno)s - %(message)s - [%(lineno)d]'
 logging.basicConfig(format=LOG_CONFIG, level=3)
+
 # Directory with small number of files to test
 TEST_DIR = r".\test_clean"
 TEST_DIR_PATH = os.path.realpath(r".\test_clean")
+CLEAN_PATH = os.path.realpath(r'.\lovecraft_works')
 
-### DO YOU NEED THIS...??
 def cmd_line_args():
     "Parse the command line arguments."
     parser = ArgumentParser()
@@ -55,13 +54,13 @@ def remove_unwanted(text):
 
     author = "HP-Lovecraft"
 
-    # TODO: Handle cases where the following doesn't work...
-
     # text = text.split('by') if 'by' in text else text.split('By')
     if 'by' in text:
         tit, _ = text.split('by')
     elif 'By' in text:
         tit, _ = text.split('By')
+    elif 'Lovecraft\'s' in text:
+        _, tit = text.split('s \"')
     # text = text.split()
     pattern = r'[\"\'\$\.\,]'
     # text = ' '.join([re.sub(pattern, '', x) for x in text])
@@ -92,7 +91,7 @@ def clean_file(filename):
 
     # lengths = []
 
-    logging.info("Test Path: %s", TEST_DIR_PATH)
+    # logging.info("Test Path: %s", TEST_DIR_PATH)
 
     # for text in os.listdir(TEST_DIR)[:3]:
     #     pth = os.path.join(TEST_DIR, text)
@@ -105,6 +104,9 @@ def clean_file(filename):
         # text = open_file.read().split('\n')
 
         dirty_file = open_file.read().split('\n')
+
+    if len(dirty_file) < 10:
+        logging.debug("%s", filename)
 
     # Get the titles...
     # file_title = dirty_file[2].replace('\"', '')      # Title to rename file
@@ -142,52 +144,64 @@ def clean_file(filename):
 
     return text_main, file_title
 
-def main():
-    "Controls the functions, gets cmd line args, etc."
-
+def old_main():
+    "Old stuff..."
     # Get the command line arguments
     logging.info("Getting command line arguments...")
 
-    args = cmd_line_args()
+    # args = cmd_line_args()
 
-    logging.info("Args: %s ", str(args))
+    #logging.info("Args: %s ", str(args))
 
-    filename = args.filename
-    directory = args.directory
-    output = args.output
+    # filename = args.filename
+    # directory = args.directory
+    # output = args.output
 
-    if directory:
-        os.getcwd()  # If directory is True, get the current directory.
+    # if directory:
+    #     os.getcwd()  # If directory is True, get the current directory.
 
-    if output:
-        pass         # If output is not none, do something...
+    # if output:
+    #     pass         # If output is not none, do something...
+    #logging.info("Directory found: %s ", os.path.isdir(TEST_DIR))
 
-    # TODO: All the stuff...
+def main():
+    "Controls the functions, gets cmd line args, etc."
 
-    logging.info("Directory found: %s ", os.path.isdir(TEST_DIR))
+    # FIXME : Some files arent working e.g. Psychopompos
+
     # x = [x for x in os.listdir(TEST_DIR_PATH)]
 
-    for txt in os.listdir(".\\fiction"):
-        # logging.debug("TXT = %s", txt)
+    folders = ['fiction', 'essays', 'poetry', 'letters']
 
-        logging.debug(filename)
-        # filename = os.path.join(TEST_DIR_PATH, txt)
-        filename = os.path.join(".\\fiction", txt)
+    for folder in folders:
+        for txt in os.listdir(folder):
+            if 'p139.txt' not in txt:
+                continue
+            # logging.debug("TXT = %s", txt)
 
-        sparkling, title = clean_file(filename)
+            # logging.debug(filename)
+            # filename = os.path.join(TEST_DIR_PATH, txt)
 
-        save_loc = os.path.realpath('abcde')
+            filename = os.path.join(folder, txt)
 
-        # logging.debug("SAVE LOC = %s", save_loc)
+            sparkling, title = clean_file(filename)
+            CLEAN_PATH2 = r'.\abcde'
+            # save_base = CLEAN_PATH  # FIXME: Why is this here?
+            # save_loc = os.path.join(CLEAN_PATH2, folder)
+            save_loc = os.path.realpath('abcde')
 
-        save_file_name = os.path.join(save_loc, title) + '.txt'
+            logging.debug("SAVE LOC = %s", save_loc)
 
-        # savename = os.path.join(save_loc)
-        logging.debug("SAVENAME = %s", save_file_name)
+            # save_file_name = os.path.join(save_loc, title) + '.txt'
+            save_file_name = title + '.txt'
 
-        with open(save_file_name, 'w', encoding='utf-8') as out:
-            for i in sparkling:
-                out.write(i + '\n')
+            # savename = os.path.join(save_loc)
+            logging.debug("SAVENAME = %s", save_file_name)
+            # logging.debug("LENGTH = %d", len(sparkling))
+
+            with open(save_file_name, 'w', encoding='utf-8') as out:
+                for i in sparkling:
+                    out.write(i + '\n')
 
     # File details...
     # Title can be found on line '3' (dirty_file[2]) of each file...
