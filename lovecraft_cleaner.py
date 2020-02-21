@@ -14,7 +14,7 @@ logging.basicConfig(format=LOG_CONFIG, level=3)
 # Directory with small number of files to test
 TEST_DIR = r".\test_clean"
 TEST_DIR_PATH = os.path.realpath(r".\test_clean")
-CLEAN_PATH = os.path.realpath(r'.\lovecraft_works')
+CLEAN_PATH = os.path.realpath(r'.\lovecraft_works_again')
 
 def cmd_line_args():
     "Parse the command line arguments."
@@ -27,7 +27,13 @@ def cmd_line_args():
 ###
 
 def find_title(text):
-    "Attempt to find the correct title for the story."
+    """Attempt to find the correct title for the story, otherwise returns a
+    blank.
+
+    The title is generally preceeded by the word 'by' (lower and upper cases),
+    however in at least one case the title follows the genitive/possessive
+    'Lovecraft's'.
+    """
     title = ''
     for line in text:
         if re.findall(r'"\s?[bB]y', line):
@@ -35,7 +41,7 @@ def find_title(text):
     return title
 
 def remove_unwanted(text):
-    "Function to remove unwanted tokens from text."
+    """Split's the text and removes unwanted tokens from the text."""
 
     author = "HP-Lovecraft"
 
@@ -46,9 +52,9 @@ def remove_unwanted(text):
     elif 'Lovecraft\'s' in text:
         _, tit = text.split('s \"')
 
-    pattern = r'[\"\'\$\.\,\[\]\:]'
+    # Must remove ':' and '[]' from titles, or problems. (esp. Psychopompous)
+    pattern = r'[\"\'\$\.\,\[\]\:\;\_\-]'
     # text = ' '.join([re.sub(pattern, '', x) for x in text])
-
     see = ''.join([re.sub(pattern, '', x) for x in tit])
     text = see.replace(' ', '_') + author
 
@@ -56,7 +62,7 @@ def remove_unwanted(text):
 
 
 def clean_file(filename):
-    "Opens the file for cleaning and save it when done."
+    """Opens the file for cleaning and save it when done."""
 
     misc_unwanted = ['His Life', 'His Writings',
                      'His Creations', 'His Study',
@@ -78,7 +84,10 @@ def clean_file(filename):
     # Get the titles...
     # file_title = dirty_file[2].replace('\"', '')      # Title to rename file
     file_title = remove_unwanted(dirty_file[2])     # Title to rename file
-    inside_title = dirty_file[2]    # Title for use at top of the book
+    if not re.findall(r'[\[\]\(\)]', dirty_file[2]):
+        inside_title = dirty_file[2]    # Title for use at top of the book
+    else:
+        inside_title = remove_unwanted(dirty_file[2])
 
     logging.info("Title: %s", inside_title)
     logging.info("File title: %s", file_title)
@@ -110,35 +119,25 @@ def clean_file(filename):
 
     return text_main, file_title
 
-def old_main():
-    "Old stuff..."
-    # Get the command line arguments
-    # args = cmd_line_args()
-    #logging.info("Args: %s ", str(args))
-    # filename = args.filename
-    # directory = args.directory
-    # output = args.output
-    # if directory: os.getcwd()  # If directory is True, get the current
-    # directory.
-    # if output: #     pass
-    # # If output is not none, do something...
-    #logging.info("Directory found: %s ", os.path.isdir(TEST_DIR))
-
+# TODO: Clean up file...
 def main():
-    "Controls the functions, gets cmd line args, etc."
+    """Controls the functions, gets cmd line args, etc."""
 
-    # FIXED : Some files arent working e.g. Psychopompos
-    # Problem was an errant colon (':') in the title
-    # x = [x for x in os.listdir(TEST_DIR_PATH)]
-
-    # folders = ['fiction', 'essays', 'poetry', 'letters']
+    # Folders replicate downloaded files and website organisation.
     folders = ('fiction', 'essays', 'poetry', 'letters') # Consider a tuple...
-    folders = ('poetry', 'letters')
+    # folders = ('poetry', 'letters')
+
 
     for folder in folders:
+        # Assumes we are in the base folder 'Lovecraft'
+
+        save_folder = os.path.join(CLEAN_PATH, folder)
+        if not os.path.exists(save_folder):
+            os.makedirs(save_folder, exist_ok=False)
+
         for txt in os.listdir(folder):
-            if 'p139.txt' not in txt:
-                continue
+            # if 'p139.txt' not in txt:
+            #     continue
             # logging.debug("TXT = %s", txt)
 
             # logging.debug(filename)
@@ -146,21 +145,23 @@ def main():
 
             filename = os.path.join(folder, txt)
 
+            # Get the clean text and the title.
             sparkling, title = clean_file(filename)
             # logging.info("%s", sparkling)
             # CLEAN_PATH2 = r'.\Test_directory'
-            CLEAN_PATH2 = r'.'
-            # save_base = CLEAN_PATH  # FIXME: Why is this here?
-            # save_loc = os.path.join(CLEAN_PATH2, folder)
-            save_loc = os.path.realpath(CLEAN_PATH2)
+            # CLEAN_PATH2 = r'.'
 
-            logging.debug("SAVE LOC = %s", save_loc)
+            # save_base = CLEAN_PATH
+            # save_loc = os.path.join(CLEAN_PATH2, folder)
+            save_loc = os.path.join(os.path.realpath(CLEAN_PATH), folder)
+
+            # logging.debug("SAVE LOC = %s", save_loc)
 
             # save_file_name = os.path.join(save_loc, title) + '.txt'
             save_file_name = title + '.txt'
 
-            savename = os.path.join(save_loc, save_file_name) + 'FUCK'
-            logging.debug("SAVENAME = %s", save_file_name)
+            savename = os.path.join(save_loc, save_file_name)
+            # logging.debug("SAVENAME = %s", save_file_name)
             # logging.debug("LENGTH = %d", len(sparkling))
 
             # logging.debug("SPARKLE TYPE = %s", type(savename))
@@ -171,6 +172,7 @@ def main():
             #         logging.info("%s", line)
             #         fucker.writelines(line)
             # with open(save_file_name, 'w', encoding='utf-8') as out:
+
             with open(savename, 'w', encoding='utf-8') as out:
                 for i in sparkling:
                     # logging.info("%s", i)
