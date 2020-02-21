@@ -13,16 +13,21 @@ from bs4 import BeautifulSoup
 from random import randint  # pylint: disable=wrong-import-order
 from requests.exceptions import HTTPError
 
+# Constants
 ADDR = 'http://www.hplovecraft.com/writings/texts/'
-LOG_CONF = "[+] %(asctime)s -%(levelname)s - %(message)s"
 LOVECRAFT_PATH = os.path.join(os.path.dirname(__file__), 'Lovecraft')
+PREFIXES = ("fiction", "poetry", "essays", "letters")
 
 # Set up the logger.
-logging.basicConfig(format=LOG_CONF,
-                    level=logging.INFO)
+LOG_CONF = "[+] %(asctime)s-%(levelname)s-%(message)s-[%(lineno)d]"
+logging.basicConfig(format=LOG_CONF, level=logging.INFO)
+
 
 def main():
-    "Download the lovecraft files..."
+    """Download the index page with the links to each text, extract the
+       links, then download each text from the site into corresponding
+       folders.
+    """
 
     logging.info('Requesting links...')
     req = requests.get(ADDR)
@@ -50,15 +55,10 @@ def main():
         }
     logging.info('Finished link parsing...')
 
-    # print(fiction)
-
-# Set up the logger.
-    prefixes = ["fiction", "poetry", "essays", "letters"]
-    # prefixes = ["letters"]
-
+    # PREFIXES = ("fiction", "poetry", "essays", "letters")
     logging.info('Downloading files...')
 
-    for pre in prefixes:
+    for pre in PREFIXES:
 
         # Define a path to save the files.
         save_path = os.path.join(LOVECRAFT_PATH, pre)
