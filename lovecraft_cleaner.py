@@ -20,20 +20,10 @@ def cmd_line_args():
     "Parse the command line arguments."
     parser = ArgumentParser()
 
-    parser.add_argument('filename',
-                        action='store')
-
-    parser.add_argument('-d', '--directory',
-                        action='store_true',
-                        default=False)
-
-    parser.add_argument('-o', '--output',
-                        action='store')
-
+    parser.add_argument('filename', action='store')
+    parser.add_argument('-o', '--output', action='store')
     args = parser.parse_args()
-
     return args
-
 ###
 
 def find_title(text):
@@ -41,12 +31,7 @@ def find_title(text):
     title = ''
     for line in text:
         if re.findall(r'"\s?[bB]y', line):
-            # print(line)
             title = line
-    # Refactor to just take the text as a line c.f. opening file...
-    # with open(text, 'r', encoding='utf-8') as open_file:
-    #     txt = open_file.read().split('\n')
-    #    print(f1[20:51])
     return title
 
 def remove_unwanted(text):
@@ -54,55 +39,37 @@ def remove_unwanted(text):
 
     author = "HP-Lovecraft"
 
-    # text = text.split('by') if 'by' in text else text.split('By')
     if 'by' in text:
         tit, _ = text.split('by')
     elif 'By' in text:
         tit, _ = text.split('By')
     elif 'Lovecraft\'s' in text:
         _, tit = text.split('s \"')
-    # text = text.split()
-    pattern = r'[\"\'\$\.\,]'
+
+    pattern = r'[\"\'\$\.\,\[\]\:]'
     # text = ' '.join([re.sub(pattern, '', x) for x in text])
+
     see = ''.join([re.sub(pattern, '', x) for x in tit])
     text = see.replace(' ', '_') + author
 
-    # text = text.replace('"\'$by', '')
     return text
 
 
 def clean_file(filename):
     "Opens the file for cleaning and save it when done."
 
-    misc_unwanted = ['His Life',
-                     'His Writings',
-                     'His Creations',
-                     'His Study',
-                     'Popular Culture',
-                     'Internet Resources',
-                     'About This Site',
-                     'Contact Us',
-                     'Site Map',
-                     'Home',
+    misc_unwanted = ['His Life', 'His Writings',
+                     'His Creations', 'His Study',
+                     'Popular Culture', 'Internet Resources',
+                     'About This Site', 'Contact Us',
+                     'Site Map', 'Home',
                      ]
 
     dirty_file = []
     text_main = []
 
-    # lengths = []
-
-    # logging.info("Test Path: %s", TEST_DIR_PATH)
-
-    # for text in os.listdir(TEST_DIR)[:3]:
-    #     pth = os.path.join(TEST_DIR, text)
-        # print(pth, os.path.isfile(pth))
     with open(filename, 'r', encoding='utf-8') as open_file:
-        # if text.endswith('py'):
-            # continue
-        # with open(pth, 'r', encoding='utf-8') as open_file:
         logging.info("Reading file %s...", filename)
-        # text = open_file.read().split('\n')
-
         dirty_file = open_file.read().split('\n')
 
     if len(dirty_file) < 10:
@@ -117,17 +84,16 @@ def clean_file(filename):
     logging.info("File title: %s", file_title)
 
     # print(remove_unwanted(file_title))
+
     dirty_file = dirty_file[20:-28]
 
+    # logging.info("%s", dirty_file)
     # Add title to the top of the file plus one extra line...
     text_main.append(inside_title)
     text_main.append('\n')
 
-    logging.info("Adding lines to clean file...")
 
-    # x = dirty_file[-8:]
-    # for i in x: print(dirty_file.index(i))
-    # logging.info("%s ", ' * '.join(x))
+    logging.info("Adding lines to clean file...")
 
     for line in dirty_file[:-8]:
         line = line.replace(u'\xa0', '')
@@ -147,31 +113,27 @@ def clean_file(filename):
 def old_main():
     "Old stuff..."
     # Get the command line arguments
-    logging.info("Getting command line arguments...")
-
     # args = cmd_line_args()
-
     #logging.info("Args: %s ", str(args))
-
     # filename = args.filename
     # directory = args.directory
     # output = args.output
-
-    # if directory:
-    #     os.getcwd()  # If directory is True, get the current directory.
-
-    # if output:
-    #     pass         # If output is not none, do something...
+    # if directory: os.getcwd()  # If directory is True, get the current
+    # directory.
+    # if output: #     pass
+    # # If output is not none, do something...
     #logging.info("Directory found: %s ", os.path.isdir(TEST_DIR))
 
 def main():
     "Controls the functions, gets cmd line args, etc."
 
-    # FIXME : Some files arent working e.g. Psychopompos
-
+    # FIXED : Some files arent working e.g. Psychopompos
+    # Problem was an errant colon (':') in the title
     # x = [x for x in os.listdir(TEST_DIR_PATH)]
 
-    folders = ['fiction', 'essays', 'poetry', 'letters']
+    # folders = ['fiction', 'essays', 'poetry', 'letters']
+    folders = ('fiction', 'essays', 'poetry', 'letters') # Consider a tuple...
+    folders = ('poetry', 'letters')
 
     for folder in folders:
         for txt in os.listdir(folder):
@@ -185,22 +147,33 @@ def main():
             filename = os.path.join(folder, txt)
 
             sparkling, title = clean_file(filename)
-            CLEAN_PATH2 = r'.\abcde'
+            # logging.info("%s", sparkling)
+            # CLEAN_PATH2 = r'.\Test_directory'
+            CLEAN_PATH2 = r'.'
             # save_base = CLEAN_PATH  # FIXME: Why is this here?
             # save_loc = os.path.join(CLEAN_PATH2, folder)
-            save_loc = os.path.realpath('abcde')
+            save_loc = os.path.realpath(CLEAN_PATH2)
 
             logging.debug("SAVE LOC = %s", save_loc)
 
             # save_file_name = os.path.join(save_loc, title) + '.txt'
             save_file_name = title + '.txt'
 
-            # savename = os.path.join(save_loc)
+            savename = os.path.join(save_loc, save_file_name) + 'FUCK'
             logging.debug("SAVENAME = %s", save_file_name)
             # logging.debug("LENGTH = %d", len(sparkling))
 
-            with open(save_file_name, 'w', encoding='utf-8') as out:
+            # logging.debug("SPARKLE TYPE = %s", type(savename))
+            # with open('PSYCHOFUCKER.txt', 'w', encoding='utf-8') as fucker:
+            #     logging.info("%s", type(fucker))
+            #     # fucker.writelines(sparkling)
+            #     for line in sparkling:
+            #         logging.info("%s", line)
+            #         fucker.writelines(line)
+            # with open(save_file_name, 'w', encoding='utf-8') as out:
+            with open(savename, 'w', encoding='utf-8') as out:
                 for i in sparkling:
+                    # logging.info("%s", i)
                     out.write(i + '\n')
 
     # File details...
